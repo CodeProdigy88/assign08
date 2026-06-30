@@ -116,11 +116,18 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 			return null;
 		}
 
+		while (original == original.getParent().getRightChild()) {
+			Node<Type> parent = original.getParent();
+			original.getParent();
+			parent = parent.getParent();
+		}
+
 		if (original.rightChild.getLeftChild() == null) {
 			return original.rightChild;
 		}
 
 		return this.getLeftMost(original);
+
 	}
 
 	/**
@@ -131,7 +138,17 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	 * @param toRemove - Node to be removed from BST
 	 */
 	private void removeNode(Node<Type> toRemove) {
-
+		Node<Type>data = null;
+		if( toRemove.getLeftChild() !=null && toRemove.getRightChild() !=null) {
+			data.setParent(toRemove.getParent());
+		}
+		if (toRemove.getLeftChild() == null && toRemove.getRightChild() == null) {
+			if (toRemove.getParent().getLeftChild() == toRemove) {
+				toRemove.getParent().getLeftChild().setLeftChild(null);
+			} else {
+				toRemove.getParent().getRightChild().setRightChild(null);
+			}
+		}
 	}
 
 	/**
@@ -158,7 +175,7 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		 */
 		@Override
 		public boolean hasNext() {
-			return isNext;
+			return (nextNode != null);
 
 		}
 
@@ -167,7 +184,8 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		 */
 		@Override
 		public Type next() {
-			return null;
+			Type data = nextNode.getData();
+			return data;
 
 		}
 
@@ -176,7 +194,12 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		 */
 		@Override
 		public void remove() {
-
+			
+			if( lastReturned.getLeftChild() !=null && lastReturned.getRightChild() !=null) {
+		Node<Type> current = nextNode;
+		Node<Type>  successor = current.successor();
+		
+		
 		}
 
 	}
