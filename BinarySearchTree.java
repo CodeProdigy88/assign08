@@ -95,38 +95,41 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	 * 
 	 * @return - The smallest value in a BST
 	 */
-	private Node<Type> getLeftMost(Node<Type> head) {
-		if (head.leftChild != null) {
-			return this.getLeftMost(head.leftChild);
+	private Node<Type> getLeftMost(Node<Type> node) {
+		if (node.leftChild != null) {
+			return this.getLeftMost(node.leftChild);
 		}
-		return head;
+		return node;
 	}
 
 	/**
 	 * Private Helper method for BinarySearchTree
 	 * 
 	 * Get the successor node. The successor is the leftmost Node of the right
-	 * subtree. If there is no successor, goes through parents until found. Returns
-	 * null if no successor exists.
+	 * subtree. If there is no successor, goes through parents until left tree is
+	 * found. Returns null if no successor exists.
 	 * 
 	 * @return the successor node
 	 */
 	private Node<Type> successor(Node<Type> original) {
 		if (original.rightChild == null) {
-			return null;
+
+			while (original == original.getParent().getRightChild()) {
+				Node<Type> parent = original.getParent();
+				original.getParent();
+				parent = parent.getParent();
+			}
+
+			// Check for null (no successor)
+			if (original == null) {
+				return null;
+			} else {
+				return getLeftMost(original);
+			}
 		}
 
-		while (original == original.getParent().getRightChild()) {
-			Node<Type> parent = original.getParent();
-			original.getParent();
-			parent = parent.getParent();
-		}
-
-		if (original.rightChild.getLeftChild() == null) {
-			return original.rightChild;
-		}
-
-		return this.getLeftMost(original);
+		// Gets the leftmost of right child
+		return getLeftMost(original.getRightChild());
 
 	}
 
@@ -138,8 +141,8 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	 * @param toRemove - Node to be removed from BST
 	 */
 	private void removeNode(Node<Type> toRemove) {
-		Node<Type>data = null;
-		if( toRemove.getLeftChild() !=null && toRemove.getRightChild() !=null) {
+		Node<Type> data = null;
+		if (toRemove.getLeftChild() != null && toRemove.getRightChild() != null) {
 			data.setParent(toRemove.getParent());
 		}
 		if (toRemove.getLeftChild() == null && toRemove.getRightChild() == null) {
@@ -194,12 +197,12 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		 */
 		@Override
 		public void remove() {
-			
-			if( lastReturned.getLeftChild() !=null && lastReturned.getRightChild() !=null) {
-		Node<Type> current = nextNode;
-		Node<Type>  successor = current.successor();
-		
-		
+
+			if (lastReturned.getLeftChild() != null && lastReturned.getRightChild() != null) {
+				Node<Type> current = nextNode;
+				Node<Type> successor = successor(current);
+
+			}
 		}
 
 	}
