@@ -112,21 +112,35 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	 * @return the successor node
 	 */
 	private Node<Type> successor(Node<Type> original) {
-		if (original.rightChild == null) {
 
-			while (original == original.getParent().getRightChild()) {
-				original = original.getParent();
-
-				// checks if no sucessor exists
-				if (original == null) {
-					return null;
-				}
-			}
+		if (original.rightChild != null) {
+			return getLeftMost(original.getRightChild());
 		}
+		Node<Type> parent = original.getParent();
+		while (parent != null && original == parent.getRightChild()) {
+			original = parent;
+			parent = parent.getParent();
+		}
+		return parent;
+	}
 
-		// Gets the leftmost of right child
-		return getLeftMost(original.getRightChild());
-
+	/**
+	 * Private Helper method for BinarySearchTree
+	 * 
+	 * @param toRemove - Node to be removed from BST
+	 */
+	private void graftChild(Node<Type> parent, Node<Type> newChild, Node<Type> oldChild) {
+		if (parent == null) {
+			head = newChild;
+			// oldChild equals head;
+		} else if (parent.getLeftChild() == oldChild) {
+			parent.setLeftChild(newChild);
+		} else {
+			parent.setRightChild(newChild);
+		}
+		if (newChild != null) {
+			newChild.setParent(parent);
+		}
 	}
 
 	/**
@@ -137,65 +151,34 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	 * @param toRemove - Node to be removed from BST
 	 */
 	private void removeNode(Node<Type> toRemove) {
-		// Case for leaf node (no children)
-		if (toRemove.getLeftChild() == null && toRemove.getRightChild() == null) {
-			// if its a left child set parent to have null left child
-			if (toRemove.getParent().getLeftChild() == toRemove) {
-				toRemove.getParent().setLeftChild(null);
 
-				// and vice versa
-			} else {
-				toRemove.getParent().setRightChild(null);
-			}
-		}
+		Node<Type> parent = toRemove.parent;
+		Node<Type> rightChild = toRemove.getRightChild();
+		Node<Type> leftChild = toRemove.getLeftChild();
 
 		// Case for it it has a left child
-		if (toRemove.getLeftChild() != null && toRemove.getRightChild() == null) {
-			// if its a left child set parent to have its child as the new left child
-			if (toRemove.getParent().getLeftChild() == toRemove) {
-				toRemove.getParent().setLeftChild(toRemove.getLeftChild());
-				// and vice versa
-			} else {
-				toRemove.getParent().setRightChild(toRemove.getLeftChild());
-			}
+		if (leftChild == null) {
+			graftChild(parent, rightChild, toRemove);
 		}
 
 		// Case for it it has a right child
-		if (toRemove.getLeftChild() == null && toRemove.getRightChild() != null) {
-			// if its a left child set parent to have its child as the new left child
-			if (toRemove.getParent().getLeftChild() == toRemove) {
-				toRemove.getParent().setLeftChild(toRemove.getRightChild());
-				// and vice versa
-			} else {
-				toRemove.getParent().setRightChild(toRemove.getRightChild());
-			}
+		else if (rightChild == null) {
+			graftChild(parent, leftChild, toRemove);
 		}
 
 		// Case if it has both
-		if (toRemove.getLeftChild() != null && toRemove.getRightChild() != null) {
-			Node<Type> successor = successor(toRemove);
-			// Remove the successor from its current place in tree
-
-			// if its a left child set parent to have null left child
-			if (successor.getParent().getLeftChild() == successor) {
-				successor.getParent().setLeftChild(null);
-
-				// and vice versa
-			} else {
-				successor.getParent().setRightChild(null);
+		else {
+			Node<Type> successor = getLeftMost(rightChild);
+			if (successor != rightChild) {
+				// if successor is in parent chain
+				graftChild(successor.getParent(), successor.getRightChild(), successor);
+				successor.setRightChild(rightChild);
+				rightChild.setParent(successor);
 			}
-
-			// Now set the successor to have current children
-			successor.setLeftChild(toRemove.getLeftChild());
-			successor.setRightChild(toRemove.getRightChild());
-
-			// Now graft the successor into the parent
-			if (toRemove.getParent().getLeftChild() == toRemove) {
-				toRemove.getParent().setLeftChild(successor);
-				// and vice versa
-			} else {
-				toRemove.getParent().setRightChild(successor);
-			}
+			
+			graftChild(parent, successor, toRemove);
+			successor.setLeftChild(leftChild);
+			leftChild.setParent(successor);
 		}
 	}
 
@@ -240,7 +223,6 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 			lastReturned = nextNode;
 			nextNode = successor(nextNode);
 			isNext = true;
-			size++;
 			return returnData;
 		}
 
@@ -249,11 +231,6 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		 */
 		@Override
 		public void remove() {
-			// At end of list or empty list
-			if (!this.hasNext()) {
-				throw new NoSuchElementException();
-			}
-
 			// If there is no safe element to remove
 			if (!isNext) {
 				throw new IllegalStateException();
